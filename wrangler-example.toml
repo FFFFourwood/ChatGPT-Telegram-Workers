@@ -22,13 +22,16 @@ kv_namespaces = [
 API_KEY = "sk-"
 TELEGRAM_AVAILABLE_TOKENS = ""
 CHAT_WHITE_LIST = ""
+# CHAT_WL_ENABLE = "true"
 # I_AM_A_GENEROUS_PERSON = "false"
 # AUTO_TRIM_HISTORY = "false"
 # MAX_HISTORY_LENGTH = "20"
 # DEBUG_MODE = "false"
 # CHAT_MODEL = "gpt-3.5-turbo"
+# ADMIN_CONTECT = ""
 # 群组相关配置
 
+# GROUP_WL_ENABLE = "true"
 # GROUP_CHAT_BOT_ENABLE = "true"
 # TELEGRAM_BOT_NAME = ""
 # GROUP_CHAT_BOT_SHARE_MODE = "false"

@@ -16,6 +16,9 @@
 |TELEGRAM_AVAILABLE_TOKENS|支持多个Telegram Bot Token|`null`|多个Token用`,`分隔|
 |CHAT_WHITE_LIST|聊天ID白名单|`null`|多个ID用`,`分隔，不知道ID，和机器人聊一句就能返回|
 |I_AM_A_GENEROUS_PERSON|关闭白名单，允许所有人访问|`false`|鉴于很多人不想设置白名单，或者不知道怎么获取ID，所以设置这个选项就能允许所有人访问， 值为`true`时生效|
+|GROUP_WL_ENABLE|是否开启群聊白名单模式|`true`|群聊的白名单独立开关|
+|CHAT_WL_ENABLE|是否开启私聊白名单模式|`true`|私聊的白名单独立开关|
+|ADMIN_CONTECT|管理员联系方式|`null`|无权限时候提示的管理员联系方式，默认为空|
 |AUTO_TRIM_HISTORY|自动清理历史记录|`true`|为了避免4096字符限制，将消息删减|
 |MAX_HISTORY_LENGTH|最大历史记录长度|`20`|`AUTO_TRIM_HISTORY开启后` 为了避免4096字符限制，将消息删减|
 |CHAT_MODEL|open ai 模型选择 |`gpt-3.5-turbo`||

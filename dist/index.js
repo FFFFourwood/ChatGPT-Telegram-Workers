@@ -13,6 +13,12 @@ var ENV = {
   TELEGRAM_BOT_NAME: [],
   // 允许所有人使用
   I_AM_A_GENEROUS_PERSON: false,
+  //管理员联系方式
+  ADMIN_CONTECT: "",
+  //打开群白名单
+  GROUP_WL_ENABLE: true,
+  //打开私聊白名单
+  CHAT_WL_ENABLE: true,
   // 白名单
   CHAT_WHITE_LIST: [],
   // 群组白名单
@@ -30,9 +36,9 @@ var ENV = {
   // 开发模式
   DEV_MODE: false,
   // 当前版本
-  BUILD_TIMESTAMP: 1678444109,
+  BUILD_TIMESTAMP: 1678455089,
   // 当前版本 commit id
-  BUILD_VERSION: "78c59e7",
+  BUILD_VERSION: "b5fd977",
   // 全局默认初始化消息
   SYSTEM_INIT_MESSAGE: "\u4F60\u662F\u4E00\u4E2A\u5F97\u529B\u7684\u52A9\u624B",
   // 全局默认初始化消息角色
@@ -846,13 +852,13 @@ async function msgCheckEnvIsReady(message) {
   return null;
 }
 async function msgFilterWhiteList(message) {
-  if (ENV.I_AM_A_GENEROUS_PERSON) {
+  if (ENV.I_AM_A_GENEROUS_PERSON || !ENV.GROUP_WL_ENABLE && !ENV.CHAT_WL_ENABLE) {
     return null;
   }
   if (SHARE_CONTEXT.chatType === "private") {
-    if (!ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
+    if (ENV.CHAT_WL_ENABLE && !ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-        `\u4F60\u6CA1\u6709\u6743\u9650\u4F7F\u7528\u8FD9\u4E2A\u547D\u4EE4, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u6DFB\u52A0\u4F60\u7684ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
+        `\u4F60\u6CA1\u6709\u6743\u9650\u4F7F\u7528\u8FD9\u4E2A\u547D\u4EE4, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458${ENV.ADMIN_CONTECT}\u6DFB\u52A0\u4F60\u7684ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
       );
     }
     return null;
@@ -861,9 +867,9 @@ async function msgFilterWhiteList(message) {
     if (!ENV.GROUP_CHAT_BOT_ENABLE) {
       return new Response("ID SUPPORT", { status: 401 });
     }
-    if (!ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
+    if (ENV.GROUP_WL_ENABLE && !ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-        `\u8BE5\u7FA4\u672A\u5F00\u542F\u804A\u5929\u6743\u9650, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u6DFB\u52A0\u7FA4ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
+        `\u8BE5\u7FA4\u672A\u5F00\u542F\u804A\u5929\u6743\u9650, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458${ENV.ADMIN_CONTECT}\u6DFB\u52A0\u7FA4ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
       );
     }
     return null;

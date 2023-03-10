@@ -13,6 +13,12 @@ export const ENV = {
   TELEGRAM_BOT_NAME: [],
   // 允许所有人使用
   I_AM_A_GENEROUS_PERSON: false,
+  //管理员联系方式
+  ADMIN_CONTECT: '',
+  //打开群白名单
+  GROUP_WL_ENABLE: true,
+  //打开私聊白名单
+  CHAT_WL_ENABLE: true,
   // 白名单
   CHAT_WHITE_LIST: [],
   // 群组白名单
