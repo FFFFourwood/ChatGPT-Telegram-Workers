@@ -40,15 +40,15 @@ async function msgCheckEnvIsReady(message) {
 
 // 过滤非白名单用户
 async function msgFilterWhiteList(message) {
-  if (ENV.I_AM_A_GENEROUS_PERSON) {
+  if (ENV.I_AM_A_GENEROUS_PERSON || (!ENV.GROUP_WL_ENABLE && !ENV.CHAT_WL_ENABLE)) {
     return null;
   }
   // 判断私聊消息
   if (SHARE_CONTEXT.chatType==='private') {
     // 白名单判断
-    if (!ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
+    if (ENV.CHAT_WL_ENABLE && !ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-          `你没有权限使用这个命令, 请请联系管理员添加你的ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
+          `你没有权限使用这个命令, 请请联系管理员${ENV.ADMIN_CONTECT}添加你的ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
       );
     }
     return null;
@@ -61,9 +61,9 @@ async function msgFilterWhiteList(message) {
       return new Response('ID SUPPORT', {status: 401});
     }
     // 白名单判断
-    if (!ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
+    if (ENV.GROUP_WL_ENABLE && !ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-          `该群未开启聊天权限, 请请联系管理员添加群ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
+          `该群未开启聊天权限, 请请联系管理员${ENV.ADMIN_CONTECT}添加群ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
       );
     }
     return null;
