@@ -13,12 +13,6 @@ var ENV = {
   TELEGRAM_BOT_NAME: [],
   // 允许所有人使用
   I_AM_A_GENEROUS_PERSON: false,
-  //管理员联系方式
-  ADMIN_CONTECT: "",
-  //打开群白名单
-  GROUP_WL_ENABLE: true,
-  //打开私聊白名单
-  CHAT_WL_ENABLE: true,
   // 白名单
   CHAT_WHITE_LIST: [],
   // 群组白名单
@@ -36,9 +30,9 @@ var ENV = {
   // 开发模式
   DEV_MODE: false,
   // 当前版本
-  BUILD_TIMESTAMP: 1678455089,
+  BUILD_TIMESTAMP: 1678523412,
   // 当前版本 commit id
-  BUILD_VERSION: "b5fd977",
+  BUILD_VERSION: "4cacd32",
   // 全局默认初始化消息
   SYSTEM_INIT_MESSAGE: "\u4F60\u662F\u4E00\u4E2A\u5F97\u529B\u7684\u52A9\u624B",
   // 全局默认初始化消息角色
@@ -48,7 +42,10 @@ var ENV = {
   // 隐藏部分命令按钮
   HIDE_COMMAND_BUTTONS: [],
   // Inline keyboard: 实验性功能请勿开启
-  INLINE_KEYBOARD_ENABLE: ["private", "group", "supergroup"]
+  INLINE_KEYBOARD_ENABLE: [],
+  // DEBUG 专用
+  TELEGRAM_API_DOMAIN: "https://api.telegram.org",
+  OPENAI_API_DOMAIN: "https://api.openai.com"
 };
 var CONST = {
   PASSWORD_KEY: "chat_history_password",
@@ -128,10 +125,8 @@ var SHARE_CONTEXT = {
   // 会话场景, private/group/supergroup 等, 来源 message.chat.type
   chatId: null,
   // 会话 id, private 场景为发言人 id, group/supergroup 场景为群组 id
-  speakerId: null,
+  speakerId: null
   // 发言人 id
-  fromInlineKeyboard: false
-  // 是否来自内联键盘
 };
 function initChatContext(chatId, replyToMessageId) {
   CURRENT_CHAT_CONTEXT.chat_id = chatId;
@@ -152,7 +147,7 @@ async function initUserConfig(storeKey) {
     console.error(e);
   }
 }
-async function initShareContext(message, request) {
+function initTelegramContext(request) {
   const { pathname } = new URL(request.url);
   const token = pathname.match(
     /^\/telegram\/(\d+:[A-Za-z0-9_-]{35})\/webhook/
@@ -163,10 +158,12 @@ async function initShareContext(message, request) {
   }
   SHARE_CONTEXT.currentBotToken = token;
   SHARE_CONTEXT.currentBotId = token.split(":")[0];
-  SHARE_CONTEXT.usageKey = `usage:${SHARE_CONTEXT.currentBotId}`;
   if (ENV.TELEGRAM_BOT_NAME.length > telegramIndex) {
     SHARE_CONTEXT.currentBotName = ENV.TELEGRAM_BOT_NAME[telegramIndex];
   }
+}
+async function initShareContext(message) {
+  SHARE_CONTEXT.usageKey = `usage:${SHARE_CONTEXT.currentBotId}`;
   const id = message?.chat?.id;
   if (id === void 0 || id === null) {
     throw new Error("Chat id not found");
@@ -193,13 +190,13 @@ async function initShareContext(message, request) {
   SHARE_CONTEXT.chatId = message.chat.id;
   SHARE_CONTEXT.speakerId = message.from.id || message.chat.id;
 }
-async function initContext(message, request) {
+async function initContext(message) {
   console.log(ENV);
   const chatId = message?.chat?.id;
   const replyId = CONST.GROUP_TYPES.includes(message.chat?.type) ? message.message_id : null;
   initChatContext(chatId, replyId);
   console.log(CURRENT_CHAT_CONTEXT);
-  await initShareContext(message, request);
+  await initShareContext(message);
   console.log(SHARE_CONTEXT);
   await initUserConfig(SHARE_CONTEXT.configStoreKey);
   console.log(USER_CONFIG);
@@ -208,7 +205,7 @@ async function initContext(message, request) {
 // src/telegram.js
 async function sendMessage(message, token, context) {
   return await fetch(
-    `https://api.telegram.org/bot${token}/sendMessage`,
+    `${ENV.TELEGRAM_API_DOMAIN}/bot${token}/sendMessage`,
     {
       method: "POST",
       headers: {
@@ -242,7 +239,7 @@ ${msg}
 async function sendPhotoToTelegram(url, token, context) {
   const chatContext = Object.assign(context || CURRENT_CHAT_CONTEXT, { parse_mode: null });
   return await fetch(
-    `https://api.telegram.org/bot${token || SHARE_CONTEXT.currentBotToken}/sendPhoto`,
+    `${ENV.TELEGRAM_API_DOMAIN}/bot${token || SHARE_CONTEXT.currentBotToken}/sendPhoto`,
     {
       method: "POST",
       headers: {
@@ -257,7 +254,7 @@ async function sendPhotoToTelegram(url, token, context) {
 }
 async function sendChatActionToTelegram(action, token) {
   return await fetch(
-    `https://api.telegram.org/bot${token || SHARE_CONTEXT.currentBotToken}/sendChatAction`,
+    `${ENV.TELEGRAM_API_DOMAIN}/bot${token || SHARE_CONTEXT.currentBotToken}/sendChatAction`,
     {
       method: "POST",
       headers: {
@@ -270,27 +267,9 @@ async function sendChatActionToTelegram(action, token) {
     }
   ).then((res) => res.json());
 }
-async function deleteMessageInlineKeyboard(chatId, messageId, token) {
-  return await fetch(
-    `https://api.telegram.org/bot${token || SHARE_CONTEXT.currentBotToken}/editMessageReplyMarkup`,
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        chat_id: chatId,
-        message_id: messageId,
-        reply_markup: {
-          inline_keyboard: []
-        }
-      })
-    }
-  ).then((res) => res.json());
-}
 async function bindTelegramWebHook(token, url) {
   return await fetch(
-    `https://api.telegram.org/bot${token}/setWebhook`,
+    `${ENV.TELEGRAM_API_DOMAIN}/bot${token}/setWebhook`,
     {
       method: "POST",
       headers: {
@@ -333,7 +312,7 @@ async function getChatRole(id) {
 async function getChatAdminister(chatId, token) {
   try {
     const resp = await fetch(
-      `https://api.telegram.org/bot${token || SHARE_CONTEXT.currentBotToken}/getChatAdministrators`,
+      `${ENV.TELEGRAM_API_DOMAIN}/bot${token || SHARE_CONTEXT.currentBotToken}/getChatAdministrators`,
       {
         method: "POST",
         headers: {
@@ -352,7 +331,7 @@ async function getChatAdminister(chatId, token) {
 }
 async function getBot(token) {
   const resp = await fetch(
-    `https://api.telegram.org/bot${token}/getMe`,
+    `${ENV.TELEGRAM_API_DOMAIN}/bot${token}/getMe`,
     {
       method: "POST",
       headers: {
@@ -382,7 +361,7 @@ async function requestCompletionsFromChatGPT(message, history) {
     ...USER_CONFIG.OPENAI_API_EXTRA_PARAMS,
     messages: [...history || [], { role: "user", content: message }]
   };
-  const resp = await fetch("https://api.openai.com/v1/chat/completions", {
+  const resp = await fetch(`${ENV.OPENAI_API_DOMAIN}/v1/chat/completions`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -403,7 +382,7 @@ async function requestImageFromOpenAI(prompt) {
     n: 1,
     size: "512x512"
   };
-  const resp = await fetch("https://api.openai.com/v1/images/generations", {
+  const resp = await fetch(`${ENV.OPENAI_API_DOMAIN}/v1/images/generations`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -827,9 +806,9 @@ function errorToString(e) {
 
 // src/message.js
 var MAX_TOKEN_LENGTH = 2048;
-async function msgInitChatContext(message, request) {
+async function msgInitChatContext(message) {
   try {
-    await initContext(message, request);
+    await initContext(message);
   } catch (e) {
     return new Response(errorToString(e), { status: 200 });
   }
@@ -852,13 +831,13 @@ async function msgCheckEnvIsReady(message) {
   return null;
 }
 async function msgFilterWhiteList(message) {
-  if (ENV.I_AM_A_GENEROUS_PERSON || !ENV.GROUP_WL_ENABLE && !ENV.CHAT_WL_ENABLE) {
+  if (ENV.I_AM_A_GENEROUS_PERSON) {
     return null;
   }
   if (SHARE_CONTEXT.chatType === "private") {
-    if (ENV.CHAT_WL_ENABLE && !ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
+    if (!ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-        `\u4F60\u6CA1\u6709\u6743\u9650\u4F7F\u7528\u8FD9\u4E2A\u547D\u4EE4, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458${ENV.ADMIN_CONTECT}\u6DFB\u52A0\u4F60\u7684ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
+        `\u4F60\u6CA1\u6709\u6743\u9650\u4F7F\u7528\u8FD9\u4E2A\u547D\u4EE4, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u6DFB\u52A0\u4F60\u7684ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
       );
     }
     return null;
@@ -867,9 +846,9 @@ async function msgFilterWhiteList(message) {
     if (!ENV.GROUP_CHAT_BOT_ENABLE) {
       return new Response("ID SUPPORT", { status: 401 });
     }
-    if (ENV.GROUP_WL_ENABLE && !ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
+    if (!ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-        `\u8BE5\u7FA4\u672A\u5F00\u542F\u804A\u5929\u6743\u9650, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458${ENV.ADMIN_CONTECT}\u6DFB\u52A0\u7FA4ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
+        `\u8BE5\u7FA4\u672A\u5F00\u542F\u804A\u5929\u6743\u9650, \u8BF7\u8BF7\u8054\u7CFB\u7BA1\u7406\u5458\u6DFB\u52A0\u7FA4ID(${CURRENT_CHAT_CONTEXT.chat_id})\u5230\u767D\u540D\u5355`
       );
     }
     return null;
@@ -891,9 +870,6 @@ async function msgHandleGroupMessage(message) {
   const botName = SHARE_CONTEXT.currentBotName;
   if (botName) {
     let mentioned = false;
-    if (SHARE_CONTEXT.fromInlineKeyboard) {
-      mentioned = true;
-    }
     if (message.reply_to_message) {
       if (message.reply_to_message.from.username === botName) {
         mentioned = true;
@@ -962,20 +938,6 @@ async function msgChatWithOpenAI(message) {
       history.push({ role: "assistant", content: answer });
       await DATABASE.put(historyKey, JSON.stringify(history)).catch(console.error);
     }
-    if (SHARE_CONTEXT.chatType && ENV.INLINE_KEYBOARD_ENABLE.includes(SHARE_CONTEXT.chatType)) {
-      const replyMarkup = {};
-      replyMarkup.inline_keyboard = [[
-        {
-          text: "\u7EE7\u7EED",
-          callback_data: `#continue`
-        },
-        {
-          text: "\u7ED3\u675F",
-          callback_data: `#end`
-        }
-      ]];
-      CURRENT_CHAT_CONTEXT.reply_markup = replyMarkup;
-    }
     return sendMessageToTelegram(answer);
   } catch (e) {
     return sendMessageToTelegram(`ERROR:CHAT: ${e.message}`);
@@ -1022,7 +984,7 @@ async function msgProcessByChatType(message) {
 }
 async function loadMessage(request) {
   const raw = await request.json();
-  console.log(raw);
+  console.log(JSON.stringify(raw));
   if (ENV.DEV_MODE) {
     setTimeout(() => {
       DATABASE.put(`log:${(/* @__PURE__ */ new Date()).toISOString()}`, JSON.stringify(raw), { expirationTtl: 600 }).catch(console.error);
@@ -1031,19 +993,7 @@ async function loadMessage(request) {
   if (raw.message) {
     return raw.message;
   } else if (raw.callback_query && raw.callback_query.message) {
-    const messageId = raw.callback_query.message?.message_id;
-    const chatId = raw.callback_query.message?.chat?.id;
-    const data = raw.callback_query.data;
-    if (data.startsWith("#continue")) {
-      raw.callback_query.message.text = "\u7EE7\u7EED";
-    } else if (data.startsWith("#end")) {
-      raw.callback_query.message.text = "/new";
-    }
-    if (messageId && chatId) {
-      setTimeout(() => deleteMessageInlineKeyboard(chatId, messageId).catch(console.error), 0);
-    }
-    SHARE_CONTEXT.fromInlineKeyboard = true;
-    return raw.callback_query.message;
+    return null;
   } else {
     throw new Error("Invalid message");
   }
@@ -1104,6 +1054,7 @@ async function loadHistory(key) {
   return { real: history };
 }
 async function handleMessage(request) {
+  initTelegramContext(request);
   const message = await loadMessage(request);
   const handlers = [
     msgInitChatContext,
@@ -1119,11 +1070,12 @@ async function handleMessage(request) {
   ];
   for (const handler of handlers) {
     try {
-      const result = await handler(message, request);
+      const result = await handler(message);
       if (result && result instanceof Response) {
         return result;
       }
     } catch (e) {
+      console.error(e);
       return new Response(errorToString(e), { status: 500 });
     }
   }
@@ -1257,6 +1209,7 @@ async function handleRequest(request) {
         } });
       }
     } catch (e) {
+      console.error(e);
       return new Response(errorToString(e), { status: 200 });
     }
   }
