@@ -31,14 +31,6 @@ var ENV = {
   AUTO_TRIM_HISTORY: true,
   // 最大历史记录长度
   MAX_HISTORY_LENGTH: 20,
-  // 调试模式
-  DEBUG_MODE: false,
-  // 开发模式
-  DEV_MODE: false,
-  // 当前版本
-  BUILD_TIMESTAMP: 1678538893,
-  // 当前版本 commit id
-  BUILD_VERSION: "fce1937",
   // 全局默认初始化消息
   SYSTEM_INIT_MESSAGE: "\u4F60\u662F\u4E00\u4E2A\u5F97\u529B\u7684\u52A9\u624B",
   // 全局默认初始化消息角色
@@ -50,9 +42,9 @@ var ENV = {
   // 检查更新的分支
   UPDATE_BRANCH: "master",
   // 当前版本
-  BUILD_TIMESTAMP: 1678546663,
+  BUILD_TIMESTAMP: 1678550522,
   // 当前版本 commit id
-  BUILD_VERSION: "94c81f1",
+  BUILD_VERSION: "078749e",
   // DEBUG 专用
   // 调试模式
   DEBUG_MODE: false,
