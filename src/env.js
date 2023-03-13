@@ -50,7 +50,7 @@ export const ENV = {
   HIDE_COMMAND_BUTTONS: [],
 
   // 检查更新的分支
-  UPDATE_BRANCH: 'master',
+  UPDATE_BRANCH: 'main-arthur-release',
   // 当前版本
   BUILD_TIMESTAMP: process.env.BUILD_TIMESTAMP || 0,
   // 当前版本 commit id
