@@ -44,11 +44,11 @@ var ENV = {
   // 隐藏部分命令按钮
   HIDE_COMMAND_BUTTONS: [],
   // 检查更新的分支
-  UPDATE_BRANCH: "master",
+  UPDATE_BRANCH: "main-arthur-release",
   // 当前版本
-  BUILD_TIMESTAMP: 1678945730,
+  BUILD_TIMESTAMP: 1678979105,
   // 当前版本 commit id
-  BUILD_VERSION: "9e23846",
+  BUILD_VERSION: "09712cb",
   // DEBUG 专用
   // 调试模式
   DEBUG_MODE: false,
