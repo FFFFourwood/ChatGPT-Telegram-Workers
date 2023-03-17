@@ -46,9 +46,9 @@ var ENV = {
   // 检查更新的分支
   UPDATE_BRANCH: "main-arthur-release",
   // 当前版本
-  BUILD_TIMESTAMP: 1678981204,
+  BUILD_TIMESTAMP: 1679056914,
   // 当前版本 commit id
-  BUILD_VERSION: "0a302f9",
+  BUILD_VERSION: "a84b529",
   // DEBUG 专用
   // 调试模式
   DEBUG_MODE: false,
