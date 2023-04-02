@@ -30,10 +30,10 @@ async function msgSaveLastMessage(message) {
 // 检查环境变量是否设置
 async function msgCheckEnvIsReady(message) {
   if (!ENV.API_KEY) {
-    return sendMessageToTelegram('OpenAI API Key 未设置');
+    return sendMessageToTelegram('OpenAI API Key not set');
   }
   if (!DATABASE) {
-    return sendMessageToTelegram('DATABASE 未设置');
+    return sendMessageToTelegram('DATABASE not set');
   }
   return null;
 }
@@ -48,7 +48,7 @@ async function msgFilterWhiteList(message) {
     // 白名单判断
     if (ENV.CHAT_WL_ENABLE && !ENV.CHAT_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-          `你没有权限使用这个命令, 请请联系管理员${ENV.ADMIN_CONTECT}添加你的ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
+          `You do not have permission to do, please contact ${ENV.ADMIN_CONTECT}to add your ID(${CURRENT_CHAT_CONTEXT.chat_id})to the white list`,
       );
     }
     return null;
@@ -63,20 +63,20 @@ async function msgFilterWhiteList(message) {
     // 白名单判断
     if (ENV.GROUP_WL_ENABLE && !ENV.CHAT_GROUP_WHITE_LIST.includes(`${CURRENT_CHAT_CONTEXT.chat_id}`)) {
       return sendMessageToTelegram(
-          `该群未开启聊天权限, 请请联系管理员${ENV.ADMIN_CONTECT}添加群ID(${CURRENT_CHAT_CONTEXT.chat_id})到白名单`,
+          `No permission, please contact ${ENV.ADMIN_CONTECT}to add group ID(${CURRENT_CHAT_CONTEXT.chat_id})to the white list`,
       );
     }
     return null;
   }
   return sendMessageToTelegram(
-      `暂不支持该类型(${SHARE_CONTEXT.chatType})的聊天`,
+      `This type of chat(${SHARE_CONTEXT.chatType}) is not supported yet`,
   );
 }
 
 // 过滤非文本消息
 async function msgFilterNonTextMessage(message) {
   if (!message.text) {
-    return sendMessageToTelegram('暂不支持非文本格式消息');
+    return sendMessageToTelegram('Not support');
   }
   return null;
 }
@@ -232,7 +232,7 @@ export async function msgProcessByChatType(message) {
   };
   if (!handlerMap.hasOwnProperty(SHARE_CONTEXT.chatType)) {
     return sendMessageToTelegram(
-        `暂不支持该类型(${SHARE_CONTEXT.chatType})的聊天`,
+        `Not support(${SHARE_CONTEXT.chatType})`,
     );
   }
   const handlers = handlerMap[SHARE_CONTEXT.chatType];
@@ -245,7 +245,7 @@ export async function msgProcessByChatType(message) {
     } catch (e) {
       console.error(e);
       return sendMessageToTelegram(
-          `处理(${SHARE_CONTEXT.chatType})的聊天消息出错`,
+          `Handle (${SHARE_CONTEXT.chatType}) error`,
       );
     }
   }

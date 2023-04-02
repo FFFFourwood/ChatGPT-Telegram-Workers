@@ -41,7 +41,7 @@ export const ENV = {
   GPT3_TOKENS_COUNT: true,
 
   // 全局默认初始化消息
-  SYSTEM_INIT_MESSAGE: '你是一个得力的助手',
+  SYSTEM_INIT_MESSAGE: 'you are a great assistant',
   // 全局默认初始化消息角色
   SYSTEM_INIT_MESSAGE_ROLE: 'system',
   // 是否开启使用统计
